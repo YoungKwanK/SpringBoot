@@ -10,5 +10,5 @@ import lombok.NoArgsConstructor;
 public class AuthorDetailDto {
     private Long id;
     private String name;
-    private String password;
+    private String email;
 }

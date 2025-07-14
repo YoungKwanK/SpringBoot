@@ -48,14 +48,14 @@ public class AuthorService {
     public List<AuthorListDto> findAll(){
         List<AuthorListDto> authorListDto = new ArrayList<>();
         for (Author author : authorRepository.findAll()){
-            authorListDto.add(new AuthorListDto(author.getId(), author.getEmail(), author.getPassword()));
+            authorListDto.add(new AuthorListDto(author.getId(), author.getEmail(), author.getEmail()));
         }
         return authorListDto;
     }
 
     public AuthorDetailDto findById(Long id) {
         Author author = authorRepository.findById(id).orElseThrow(()->new NoSuchElementException("해당 ID가 존재하지 않습니다."));
-        AuthorDetailDto authorDetailDto = new AuthorDetailDto(author.getId(), author.getEmail(), author.getPassword());
+        AuthorDetailDto authorDetailDto = new AuthorDetailDto(author.getId(), author.getEmail(), author.getEmail());
         return authorDetailDto;
     }
 
