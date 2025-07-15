@@ -5,16 +5,17 @@ import com.beyond.basic.b2_board.dto.AuthorCreateDto;
 import com.beyond.basic.b2_board.dto.AuthorDetailDto;
 import com.beyond.basic.b2_board.dto.AuthorListDto;
 import com.beyond.basic.b2_board.dto.AuthorUpdatePwDto;
-import com.beyond.basic.b2_board.repository.AuthorMemoryRepository;
+import com.beyond.basic.b2_board.repository.AuthorJdbcRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
+// 스프링에서 메서드 단위로 트랜잭션처리를 하고, 만약 예외(unchecked)발생 시 자동 롤백처리 지원.
+@Transactional
 @RequiredArgsConstructor
 @Service // Component로도 대체 가능(트랜잭션처리가 없는 경우)
 public class AuthorService {
@@ -33,7 +34,7 @@ public class AuthorService {
 
     //    의존성주입방법3. RequiredArgs 어노테이션 사용 : 반드시 초기화 되어야 하는 필드(final)을 대상으로 생성자를 자동 생성
     //    다형성 설계는 불가
-    private final AuthorMemoryRepository authorRepository;
+    private final AuthorJdbcRepository authorRepository;
 
     // 객체 조립은 서비스 담당
     public void save(AuthorCreateDto authorCreateDto) {
@@ -41,21 +42,24 @@ public class AuthorService {
         if (authorRepository.findByEmail(authorCreateDto.getEmail()).isPresent()){
             throw new IllegalArgumentException("이미 이메일이 존재합니다.");
         }
-        Author author = new Author(authorCreateDto.getName(), authorCreateDto.getEmail(), authorCreateDto.getPassword());
-        this.authorRepository.save(author);
+//        Author author = new Author(authorCreateDto.getName(), authorCreateDto.getEmail(), authorCreateDto.getPassword());
+        Author author = authorCreateDto.authorToEntity();
+        authorRepository.save(author);
     }
 
+    // 트랜잭션이 필요 없는 경우, 아래와 같이 명시적으로 제외
+    @Transactional(readOnly = true)
     public List<AuthorListDto> findAll(){
-        List<AuthorListDto> authorListDto = new ArrayList<>();
-        for (Author author : authorRepository.findAll()){
-            authorListDto.add(new AuthorListDto(author.getId(), author.getEmail(), author.getEmail()));
-        }
-        return authorListDto;
+        return authorRepository.findAll()
+                .stream()
+                .map(a->a.authorListDtoFromEntity())
+                .collect(Collectors.toList());
     }
-
+    @Transactional(readOnly = true)
     public AuthorDetailDto findById(Long id) {
         Author author = authorRepository.findById(id).orElseThrow(()->new NoSuchElementException("해당 ID가 존재하지 않습니다."));
-        AuthorDetailDto authorDetailDto = new AuthorDetailDto(author.getId(), author.getEmail(), author.getEmail());
+//        return new AuthorDetailDto(author.getId(), author.getName(), author.getEmail());
+        AuthorDetailDto authorDetailDto = AuthorDetailDto.fromEntity(author);
         return authorDetailDto;
     }
 

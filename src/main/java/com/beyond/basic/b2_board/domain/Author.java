@@ -1,14 +1,18 @@
 package com.beyond.basic.b2_board.domain;
 
+import com.beyond.basic.b2_board.dto.AuthorCreateDto;
+import com.beyond.basic.b2_board.dto.AuthorDetailDto;
+import com.beyond.basic.b2_board.dto.AuthorListDto;
 import com.beyond.basic.b2_board.repository.AuthorMemoryRepository;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @NoArgsConstructor
 @Getter
 @AllArgsConstructor
+@ToString
 public class Author {
     private Long id;
     private String name;
@@ -16,7 +20,7 @@ public class Author {
     private String password;
 
     public Author(String name, String email, String password) {
-        this.id= AuthorMemoryRepository.id;
+//        this.id= AuthorMemoryRepository.id;
         this.name = name;
         this.email = email;
         this.password = password;
@@ -24,5 +28,13 @@ public class Author {
 
     public void updatePw(String password) {
         this.password = password;
+    }
+
+    public AuthorDetailDto authorDetailDtoFromEntity() {
+        return new AuthorDetailDto(this.id, this.name, this.email);
+    }
+
+    public AuthorListDto authorListDtoFromEntity() {
+        return new AuthorListDto(this.id, this.name, this.email);
     }
 }
