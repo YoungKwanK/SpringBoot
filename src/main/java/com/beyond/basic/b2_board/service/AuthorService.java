@@ -5,7 +5,9 @@ import com.beyond.basic.b2_board.dto.AuthorCreateDto;
 import com.beyond.basic.b2_board.dto.AuthorDetailDto;
 import com.beyond.basic.b2_board.dto.AuthorListDto;
 import com.beyond.basic.b2_board.dto.AuthorUpdatePwDto;
-import com.beyond.basic.b2_board.repository.AuthorJdbcRepository;
+import com.beyond.basic.b2_board.repository.AuthorJpaRepository;
+import com.beyond.basic.b2_board.repository.AuthorMybatisRepository;
+import com.beyond.basic.b2_board.repository.AuthorRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,7 +36,7 @@ public class AuthorService {
 
     //    의존성주입방법3. RequiredArgs 어노테이션 사용 : 반드시 초기화 되어야 하는 필드(final)을 대상으로 생성자를 자동 생성
     //    다형성 설계는 불가
-    private final AuthorJdbcRepository authorRepository;
+    private final AuthorRepository authorRepository;
 
     // 객체 조립은 서비스 담당
     public void save(AuthorCreateDto authorCreateDto) {
@@ -64,12 +66,14 @@ public class AuthorService {
     }
 
     public void updatePassword(AuthorUpdatePwDto authorUpdatePwDto) {
-        Author author = authorRepository.findByEmail(authorUpdatePwDto.getEmail()).orElseThrow(()->new NoSuchElementException());
-        author.updatePw(author.getPassword());
+        Author author = authorRepository.findByEmail(authorUpdatePwDto.getEmail())
+                .orElseThrow(()->new NoSuchElementException());
+//        dirty checking : 객체를 수정한 후 별도의 update쿼리 발생시키지 않아도, 영속성 컨텍스트에 의해 객체 변경사항 자동 DB반영
+        author.updatePw(authorUpdatePwDto.getPassword());
     }
 
     public void delete(Long id) {
-        authorRepository.findById(id).orElseThrow(()->new NoSuchElementException("없는 사용자입니다."));
-        authorRepository.delete(id);
+        Author author = authorRepository.findById(id).orElseThrow(()->new NoSuchElementException("없는 사용자입니다."));
+        authorRepository.delete(author);
     }
 }
