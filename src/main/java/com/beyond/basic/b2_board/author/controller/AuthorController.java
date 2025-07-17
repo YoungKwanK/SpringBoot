@@ -1,12 +1,14 @@
-package com.beyond.basic.b2_board.controller;
+package com.beyond.basic.b2_board.author.controller;
 
-import com.beyond.basic.b2_board.domain.Author;
-import com.beyond.basic.b2_board.dto.*;
-import com.beyond.basic.b2_board.service.AuthorService;
+import com.beyond.basic.b2_board.author.dto.AuthorCreateDto;
+import com.beyond.basic.b2_board.author.dto.AuthorListDto;
+import com.beyond.basic.b2_board.author.dto.AuthorUpdatePwDto;
+import com.beyond.basic.b2_board.author.dto.CommonDto;
+import com.beyond.basic.b2_board.author.service.AuthorService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,7 +21,8 @@ public class AuthorController {
     private final AuthorService authorService;
     // 회원가입
     @PostMapping("/create")
-    public ResponseEntity<?> save(@RequestBody AuthorCreateDto authorCreateDto) {
+//    dto에 있는 validation어노테이션과 controller @Valid가 한 쌍
+    public ResponseEntity<?> save(@Valid @RequestBody AuthorCreateDto authorCreateDto) {
 //        try{
 //            authorService.save(authorCreateDto);
 //            return new ResponseEntity<>("OK", HttpStatus.CREATED);
@@ -30,7 +33,7 @@ public class AuthorController {
 //        }
         // controllerAdvice가 없었으면 위와 같이 개별적인 예외처리가 필요하나, 이제는 전역적인 예외처리가 가능.
         authorService.save(authorCreateDto);
-        return new ResponseEntity<>("OK", HttpStatus.CREATED);
+        return new ResponseEntity<>(new CommonDto("",HttpStatus.OK.value(), "성공 ~"), HttpStatus.OK);
     }
     
     // 회원목록조회 : /author/list
@@ -43,14 +46,8 @@ public class AuthorController {
     // 서버에서 별도의 try catch하지 않으면, 에러 발생 시 500에러 + 스프링의 포맷으로 에러를 리턴.
     @GetMapping("/detail/{id}")
     public ResponseEntity<?> findById (@PathVariable Long id)throws NoSuchElementException {
-        try {
 //            return new ResponseEntity<>(authorService.findById(id), HttpStatus.OK);
-            return new ResponseEntity<>(new CommonDto(authorService.findById(id),HttpStatus.OK.value(), "성공 ~"), HttpStatus.OK);
-        }catch (NoSuchElementException e){
-            e.printStackTrace();
-
-            return new ResponseEntity<>(new CommonErrorDto(HttpStatus.BAD_REQUEST.value(),e.getMessage()), HttpStatus.BAD_REQUEST);
-        }
+        return new ResponseEntity<>(new CommonDto(authorService.findById(id),HttpStatus.OK.value(), "성공 ~"), HttpStatus.OK);
     }
     
     // 비밀번호수정 : email.password -> json. /author/updatepw

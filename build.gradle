@@ -44,6 +44,9 @@ dependencies {
 
 	// 서버에서 화면을 만들어 렌더링(화면을 준다라는 의미) 해주기 위한 기술
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
+	// 값 검증을 위한 의존성
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
 }
 
 tasks.named('test') {
