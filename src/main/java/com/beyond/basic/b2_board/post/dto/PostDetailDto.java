@@ -1,33 +1,34 @@
 package com.beyond.basic.b2_board.post.dto;
 
-import com.beyond.basic.b2_board.author.domain.Author;
+
 import com.beyond.basic.b2_board.post.domain.Post;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Data
 @Builder
 public class PostDetailDto {
+
     private Long id;
     private String title;
     private String contents;
     private String authorEmail;
 
-//    관계성 설정을 하지 않았을 때 코드
-//    public static PostDetailDto fromEntity(Post post, Author author){
-//        return PostDetailDto.builder()
+    // 엔티티 간 관계성 설정을 하지 않았을 경우
+//    public static PostDetailDTO fromEntity(Post post, Author author) {
+//        return PostDetailDTO.builder()
 //                .id(post.getId())
 //                .title(post.getTitle())
 //                .contents(post.getContents())
 //                .authorEmail(author.getEmail())
 //                .build();
 //    }
-    
-//    관계성 설정을 했을 때
+
+    // 엔티티 간 관계성 설정한 경우
     public static PostDetailDto fromEntity(Post post) {
         return PostDetailDto.builder()
                 .id(post.getId())
@@ -36,5 +37,4 @@ public class PostDetailDto {
                 .authorEmail(post.getAuthor().getEmail())
                 .build();
     }
-
 }

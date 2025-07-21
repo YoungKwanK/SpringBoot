@@ -8,6 +8,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @NoArgsConstructor
@@ -41,7 +42,12 @@ public class Author {
     @UpdateTimestamp
     private LocalDateTime updatedTime;
 
-
+    // @OneToMany는 선택 사항, @ManyToOne과 달리 fetch 옵션의 default가 FetchType.LAZY
+    // mappedBy 에는 ManyToOne 쪽에 변수명을 문자열로 지정
+    // mappedBy를 지정해야 하는 이유는 FK 관리를 매핑되어 있는 (Post) 쪽에서 한다는 의미 => 연관 관계의 주인 설정
+    @OneToMany(mappedBy = "author", fetch = FetchType.LAZY)
+    @Builder.Default
+    List<Post> postList = new ArrayList<>();            // @OneToMany 설정 시 List 초기화 필수, @Builder.Default 설정 필수
 
     public void updatePw(String password) {
         this.password = password;

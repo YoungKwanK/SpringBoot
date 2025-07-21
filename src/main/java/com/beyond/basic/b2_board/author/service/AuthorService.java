@@ -6,6 +6,7 @@ import com.beyond.basic.b2_board.author.dto.AuthorDetailDto;
 import com.beyond.basic.b2_board.author.dto.AuthorListDto;
 import com.beyond.basic.b2_board.author.dto.AuthorUpdatePwDto;
 import com.beyond.basic.b2_board.author.repository.AuthorRepository;
+import com.beyond.basic.b2_board.post.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,64 +15,112 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
-// 스프링에서 메서드 단위로 트랜잭션처리를 하고, 만약 예외(unchecked)발생 시 자동 롤백처리 지원.
-@Transactional
-@RequiredArgsConstructor
-@Service // Component로도 대체 가능(트랜잭션처리가 없는 경우)
-public class AuthorService {
-//    의존성 주입(DI) 방법 1. Autowired 어노테이션 사용. -> 필드주입
-//    @Autowired
-//    private AuthorRepository authorRepository;
 
-//    의존성주입(DI)방법2. 생성자주입방식(가장 많이 쓰는 방식)
-//    장점1) final을 통해 상수로 사용 가능(안전성 향상) 장점2) 다형성 구현 가능 장점3) 순환참조방식(컴파일타임에 check)
+@Transactional      // 스프링에서 메서드 단위로 트랜잭션 처리(commit)하고, 만약 예외(unchecked) 발생 시 자동 롤백 처리 지원
+@Service            // transaction 처리가 없는 경우에는 @Component로 대체 가능
+@RequiredArgsConstructor
+public class AuthorService {
+
+    // 의존성 주입(DI)
+    // 방법1) @Autowired 사용 -> 필드 주입
+//    @Autowired
+//    private AuthorRepositoryInterface authorRepository;
+
+    // 방법2)  생성자 주입 방식 (가장 많이 쓰는 방식)
+    // 장점1. final을 통해 상수로 사용 가능 (안정성 향상)
+    // 장점2. 다형성 구현 가능
+    // 장점3. 순환 참조 방지 (컴파일 타임에 check)
 //    private final AuthorRepositoryInterface authorRepository;
-//    객체로 만들어지는 시점에 스프링에서 authorRepository 객체를 주입
-//    @Autowired 생성자가 하나밖에 없을 때에는 Autowired생략 가능
+
+    // 싱글톤 객체로 만들어지는 시점에 스프링에서 AuthorRepository 객체를 매개변수로 주입해 준다.
+    // 생성자가 하나밖에 없을 때에는 @Autowired 생략가 가능
+//    @Autowired
 //    public AuthorService(AuthorMemoryRepository authorRepository) {
 //        this.authorRepository = authorRepository;
 //    }
 
-    //    의존성주입방법3. RequiredArgs 어노테이션 사용 : 반드시 초기화 되어야 하는 필드(final)을 대상으로 생성자를 자동 생성
-    //    다형성 설계는 불가
+    // ⭐방법3) @RequiredArgsConstructor 사용 -> 반드시 초기화되어야 하는 필드(final 등)를 대상으로 생성자를 자동 생성
+    // 다형성 설계는 불가
+//    private final AuthorMybatisRepository authorRepository;
     private final AuthorRepository authorRepository;
+    private final PostRepository postRepository;
 
+    // 회원 가입
     // 객체 조립은 서비스 담당
-    public void save(AuthorCreateDto authorCreateDto) {
-//        이메일 중복 검증
-        if (authorRepository.findByEmail(authorCreateDto.getEmail()).isPresent()){
-            throw new IllegalArgumentException("이미 이메일이 존재합니다.");
+    public void save(AuthorCreateDto authorCreateDTO) {
+        // 이메일 중복 검증
+        if (authorRepository.findByEmail(authorCreateDTO.getEmail()).isPresent()) {
+            throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
         }
-//        Author author = new Author(authorCreateDto.getName(), authorCreateDto.getEmail(), authorCreateDto.getPassword());
-        Author author = authorCreateDto.authorToEntity();
-        authorRepository.save(author);
+//        this.authorRepository.save(회원객체);
+        // 비밀번호 길이 검증
+        if (authorCreateDTO.getPassword().length() <= 8) {
+            throw new IllegalArgumentException("비밀번호가 너무 짧습니다.");
+        }
+
+//        Author author = new Author(authorCreateDTO.getName(), authorCreateDTO.getEmail(), authorCreateDTO.getPassword());
+        // toEntity 패턴을 통해 Author 객체 조립을 공통화
+        Author author = authorCreateDTO.authorToEntity();
+        this.authorRepository.save(author);
     }
 
-    // 트랜잭션이 필요 없는 경우, 아래와 같이 명시적으로 제외
     @Transactional(readOnly = true)
-    public List<AuthorListDto> findAll(){
-        return authorRepository.findAll()
-                .stream()
-                .map(a->a.authorListDtoFromEntity())
-                .collect(Collectors.toList());
+    public List<AuthorListDto> findAll() {
+//        List<AuthorListDTO> dtoList = new ArrayList<>();
+//        for (Author a : authorMemoryRepository.findAll()) {
+//            AuthorListDTO dto = new AuthorListDTO(a.getId(), a.getName(), a.getEmail());
+//            AuthorListDTO dto = author.listFromEntity();
+//            dtoList.add(dto);
+//        }
+//        return dtoList;
+        return authorRepository.findAll().stream().map(a -> a.authorListDtoFromEntity()).collect(Collectors.toList());
+//        return authorMemoryRepository.findAll();
     }
+
+    // 회원 상세 조회 by id
+//    public Author findById(Long id) throws NoSuchElementException {
+//    NoSuchElementException : Collection 이나 Optional 객체의 요소 없을 시 발생
     @Transactional(readOnly = true)
-    public AuthorDetailDto findById(Long id) {
-        Author author = authorRepository.findById(id).orElseThrow(()->new NoSuchElementException("해당 ID가 존재하지 않습니다."));
-//        return new AuthorDetailDto(author.getId(), author.getName(), author.getEmail());
-        AuthorDetailDto authorDetailDto = AuthorDetailDto.fromEntity(author);
-        return authorDetailDto;
+    public AuthorDetailDto findById(Long id) throws NoSuchElementException {
+        Author author = authorRepository.findById(id).orElseThrow(() -> new NoSuchElementException("존재하지 않는 id 입니다."));
+//        AuthorDetailDTO dto = new AuthorDetailDTO(author.getId(), author.getName(), author.getEmail());
+//        AuthorDetailDTO dto1 = author.detailFromEntity();
+
+        // 연관 관계 설정 없이 직접 조회하여 postCount 값 찾는 경우
+        int postCount = postRepository.findByAuthorId(id).size();
+        int postCount2 = postRepository.findByAuthor(author).size();
+        AuthorDetailDto dto2 = AuthorDetailDto.fromEntity(author, postCount);
+
+        // ⭐ @OneToMany 연관 관계 설정을 통해 postCount 값 찾는 경우
+        AuthorDetailDto dto3 = AuthorDetailDto.fromEntity(author);
+        return dto3;
+
+
+        // optional 객체를 꺼내오는 것도 service 의 역할
+        // 예외도 service 에서 발생시키는 이유 -> spring 에서 예외는 rollback의 기준이 되기 때문
+        // service 에서 발생한 예외는 controller 에서 try-catch를 통해 예외 처리
+//        Optional<Author> optionalAuthor = authorMemoryRepository.findById(id);
+        // orElseThrow로 예외처리
+//        return this.authorMemoryRepository.findById(id).orElseThrow();
+//        return optionalAuthor.orElseThrow(() -> new NoSuchElementException("존재하지 않는 id 입니다."));
     }
 
-    public void updatePassword(AuthorUpdatePwDto authorUpdatePwDto) {
-        Author author = authorRepository.findByEmail(authorUpdatePwDto.getEmail())
-                .orElseThrow(()->new NoSuchElementException());
-//        dirty checking : 객체를 수정한 후 별도의 update쿼리 발생시키지 않아도, 영속성 컨텍스트에 의해 객체 변경사항 자동 DB반영
-        author.updatePw(authorUpdatePwDto.getPassword());
+    // 비밀번호 변경
+    public void updatePassword(AuthorUpdatePwDto authorUpdatePwDTO) {
+        // setter 없으니 수정 불가 -> Author 도메인에 메서드 생성
+        Author author = authorRepository.findByEmail(authorUpdatePwDTO.getEmail())
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 이메일입니다."));
+        // dirty checking : 객체를 수정한 후에 별도의 update 쿼리 발생시키지 않아도
+        // 영속성 컨텍스트에 의해 객체 변경 사항 자동 DB 반영
+        author.updatePw(authorUpdatePwDTO.getPassword());
+        System.out.println(author.getPassword());
     }
 
+    // 회원 탈퇴
     public void delete(Long id) {
-        Author author = authorRepository.findById(id).orElseThrow(()->new NoSuchElementException("없는 사용자입니다."));
+        Author author = authorRepository.findById(id).orElseThrow(() -> new NoSuchElementException("없는 사용자입니다."));
         authorRepository.delete(author);
+//        authorRepository.findById(id).orElseThrow(() -> new NoSuchElementException("없는 사용자입니다."));
+//        authorRepository.delete(id);
     }
 }
