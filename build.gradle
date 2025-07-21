@@ -47,6 +47,9 @@ dependencies {
 
 	// 값 검증을 위한 의존성
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+	// 로그인을 위한 security 의존성
+	implementation 'org.springframework.boot:spring-boot-starter-security'
 }
 
 tasks.named('test') {

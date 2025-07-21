@@ -1,6 +1,6 @@
 package com.beyond.basic.b2_board.post.controller;
 
-import com.beyond.basic.b2_board.author.dto.CommonDto;
+import com.beyond.basic.b2_board.common.dto.CommonDto;
 import com.beyond.basic.b2_board.post.dto.PostCreateDto;
 import com.beyond.basic.b2_board.post.dto.PostDetailDto;
 import com.beyond.basic.b2_board.post.dto.PostListDto;
@@ -53,7 +53,11 @@ public class PostController {
     @GetMapping("/detail/{id}")
     public ResponseEntity<?> detail(@PathVariable Long id) {
         PostDetailDto postDetailDTO = postService.findById(id);
-        return new ResponseEntity<>(new CommonDto(postDetailDTO, HttpStatus.OK.value()
-                , "post is found"), HttpStatus.OK);
+        return new ResponseEntity<>(CommonDto.builder()
+                .result(postDetailDTO)
+                .status_code(HttpStatus.OK.value())
+                .status_message("post is found")
+                .build()
+                ,HttpStatus.OK);
     }
 }

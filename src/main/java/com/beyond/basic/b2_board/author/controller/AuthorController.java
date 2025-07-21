@@ -3,7 +3,7 @@ package com.beyond.basic.b2_board.author.controller;
 import com.beyond.basic.b2_board.author.dto.AuthorCreateDto;
 import com.beyond.basic.b2_board.author.dto.AuthorListDto;
 import com.beyond.basic.b2_board.author.dto.AuthorUpdatePwDto;
-import com.beyond.basic.b2_board.author.dto.CommonDto;
+import com.beyond.basic.b2_board.common.dto.CommonDto;
 import com.beyond.basic.b2_board.author.service.AuthorService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +33,7 @@ public class AuthorController {
 //        }
         // controllerAdvice가 없었으면 위와 같이 개별적인 예외처리가 필요하나, 이제는 전역적인 예외처리가 가능.
         authorService.save(authorCreateDto);
-        return new ResponseEntity<>(new CommonDto("",HttpStatus.OK.value(), "성공 ~"), HttpStatus.OK);
+        return new ResponseEntity<>(new CommonDto("",HttpStatus.CREATED.value(), "성공 ~"), HttpStatus.CREATED);
     }
     
     // 회원목록조회 : /author/list
