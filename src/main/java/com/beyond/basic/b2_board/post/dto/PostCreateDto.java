@@ -20,8 +20,8 @@ public class PostCreateDto {
 
     private String contents;
 
-    @NotNull                    // 숫자는 @NotEmpty 사용 불가
-    private Long authorId;
+//    @NotNull                    // 숫자는 @NotEmpty 사용 불가
+//    private Long authorId;
 
 
     public Post toEntity(Author author) {

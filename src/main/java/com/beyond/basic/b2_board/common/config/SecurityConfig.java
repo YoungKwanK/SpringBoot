@@ -4,6 +4,7 @@ import com.beyond.basic.b2_board.common.JwtTokenFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -19,6 +20,8 @@ import java.util.Arrays;
 
 @RequiredArgsConstructor
 @Configuration
+// PreAuthorize어노테이션 사용하기 위한 설정
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final JwtTokenFilter jwtTokenFilter;

@@ -4,6 +4,7 @@ import com.beyond.basic.b2_board.author.domain.Author;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -21,7 +22,10 @@ public class JwtTokenProvider {
     private String secretKeyAt;
 
     private Key secret_at_key;
-    public void makeKey(){
+
+    // 스프링 빈이 만들어지는 시점에 빈이 만들어진 직후에 아래 메서드가 바로 실행
+    @PostConstruct
+    public void init(){
         secret_at_key = new SecretKeySpec(java.util.Base64.getDecoder().decode(secretKeyAt)
         , SignatureAlgorithm.HS512.getJcaName());
     }
@@ -40,7 +44,7 @@ public class JwtTokenProvider {
                 .setExpiration(new Date(now.getTime() + expirationAt*60*1000L)) // 30분을 세팅(밀리초)
 //                secret키를 통해 signiture 생성
                 .signWith(secret_at_key)
-                .compact()
-        return null;
+                .compact();
+        return token;
     }
 }

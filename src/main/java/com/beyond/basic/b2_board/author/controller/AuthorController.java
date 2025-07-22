@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -42,6 +43,7 @@ public class AuthorController {
     
     // 회원목록조회 : /author/list
     @GetMapping("/list")
+    @PreAuthorize("hasRole('ADMIN')")
     public List<AuthorListDto> findByAll(){
         return authorService.findAll();
     }
@@ -49,6 +51,8 @@ public class AuthorController {
     // 회원상세조회(id) : id로 조회. /author/detail/1
     // 서버에서 별도의 try catch하지 않으면, 에러 발생 시 500에러 + 스프링의 포맷으로 에러를 리턴.
     @GetMapping("/detail/{id}")
+//    ADMIN권한이 있는 지를 AUTHENTICATION 객체에서 쉽게 확인(ROLE_를 떼어줌)
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> findById (@PathVariable Long id)throws NoSuchElementException {
 //            return new ResponseEntity<>(authorService.findById(id), HttpStatus.OK);
         return new ResponseEntity<>(new CommonDto(authorService.findById(id),HttpStatus.OK.value(), "성공 ~"), HttpStatus.OK);
