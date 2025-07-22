@@ -22,11 +22,11 @@ public class AuthorCreateDto {
 //    문자열로 값이 넘어오면 Role에 값으로 매핑
     private Role role = Role.USER;
 
-    public Author authorToEntity(){
+    public Author authorToEntity(String encodedPassword){
 //        빌더 패턴은 매개변수의 개수와 순서에 상관없이 객체생성 가능
         return Author.builder()
                 .name(this.name)
-                .password(this.password)
+                .password(encodedPassword)
                 .email(this.email)
                 .role(this.role)
                 .build();

@@ -1,6 +1,0 @@
-# spring은 실행 시 무조건 application.yml 을 찾음
-# active: local - application-local.yml 을 찾도록 설정
-# 설정 후 application-local.yml, application-prod.yml 에 config 설정 필요
-spring:
-  profiles:
-    active: local

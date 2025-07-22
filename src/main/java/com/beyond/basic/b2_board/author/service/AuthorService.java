@@ -1,19 +1,19 @@
 package com.beyond.basic.b2_board.author.service;
 
 import com.beyond.basic.b2_board.author.domain.Author;
-import com.beyond.basic.b2_board.author.dto.AuthorCreateDto;
-import com.beyond.basic.b2_board.author.dto.AuthorDetailDto;
-import com.beyond.basic.b2_board.author.dto.AuthorListDto;
-import com.beyond.basic.b2_board.author.dto.AuthorUpdatePwDto;
+import com.beyond.basic.b2_board.author.dto.*;
 import com.beyond.basic.b2_board.author.repository.AuthorRepository;
 import com.beyond.basic.b2_board.post.domain.Post;
 import com.beyond.basic.b2_board.post.repository.PostRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -45,6 +45,7 @@ public class AuthorService {
 //    private final AuthorMybatisRepository authorRepository;
     private final AuthorRepository authorRepository;
     private final PostRepository postRepository;
+    private final PasswordEncoder passwordEncoder;
 
     // 회원 가입
     // 객체 조립은 서비스 담당
@@ -62,7 +63,8 @@ public class AuthorService {
 
 //        Author author = new Author(authorCreateDTO.getName(), authorCreateDTO.getEmail(), authorCreateDTO.getPassword());
         // toEntity 패턴을 통해 Author 객체 조립을 공통화
-        Author author = authorCreateDto.authorToEntity();
+        String encodedPassword = passwordEncoder.encode(authorCreateDto.getPassword());
+        Author author = authorCreateDto.authorToEntity(encodedPassword);
         this.authorRepository.save(author);
 
         //        casccadeing 테스트 : 회원이 생성될 때, 곧바로 "가입인사"글을 생성하는 상황
@@ -138,5 +140,23 @@ public class AuthorService {
         authorRepository.delete(author);
 //        authorRepository.findById(id).orElseThrow(() -> new NoSuchElementException("없는 사용자입니다."));
 //        authorRepository.delete(id);
+    }
+
+    public Author login(AuthorLoginDto authorLoginDto){
+        Optional<Author> optionalAuthor = authorRepository.findByEmail(authorLoginDto.getEmail());
+        boolean check= true;
+        if(!optionalAuthor.isPresent()){
+            check=false;
+        }else{
+//        비밀번호 일치여부 검증 : matches함수를 통해서 암호화되지않은 값을 다시 암호화하여 db의 password를 검증
+            if(!passwordEncoder.matches(authorLoginDto.getPassword(), optionalAuthor.get().getPassword())){
+                check=false;
+            }
+        }
+        if(!check) {
+            System.out.println("로그인 실패");
+            throw new IllegalArgumentException("이메일 또는 비밀번호가 일치하지 않습니다.");
+        }
+        return optionalAuthor.get();
     }
 }

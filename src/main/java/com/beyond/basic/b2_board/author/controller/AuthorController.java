@@ -1,8 +1,11 @@
 package com.beyond.basic.b2_board.author.controller;
 
+import com.beyond.basic.b2_board.author.domain.Author;
 import com.beyond.basic.b2_board.author.dto.AuthorCreateDto;
 import com.beyond.basic.b2_board.author.dto.AuthorListDto;
+import com.beyond.basic.b2_board.author.dto.AuthorLoginDto;
 import com.beyond.basic.b2_board.author.dto.AuthorUpdatePwDto;
+import com.beyond.basic.b2_board.common.JwtTokenProvider;
 import com.beyond.basic.b2_board.common.dto.CommonDto;
 import com.beyond.basic.b2_board.author.service.AuthorService;
 import jakarta.validation.Valid;
@@ -19,6 +22,7 @@ import java.util.NoSuchElementException;
 @RequestMapping("/author")
 public class AuthorController {
     private final AuthorService authorService;
+    private final JwtTokenProvider jwtTokenProvider;
     // 회원가입
     @PostMapping("/create")
 //    dto에 있는 validation어노테이션과 controller @Valid가 한 쌍
@@ -62,5 +66,15 @@ public class AuthorController {
     @DeleteMapping("/de/{id}")
     public void delete(@PathVariable Long id) {
         authorService.delete(id);
+    }
+    
+    // 로그인
+    @PostMapping("doLogin")
+    public ResponseEntity<?> login(@RequestBody AuthorLoginDto authorLoginDto){
+        Author author = authorService.login(authorLoginDto);
+//        토큰 생성 및 return
+        String token = jwtTokenProvider.createAtToken(author);
+        return new ResponseEntity<>(new CommonDto(token, HttpStatus.OK.value(), "token is created")
+                ,HttpStatus.OK);
     }
 }
