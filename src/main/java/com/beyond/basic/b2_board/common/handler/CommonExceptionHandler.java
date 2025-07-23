@@ -1,4 +1,4 @@
-package com.beyond.basic.b2_board.common;
+package com.beyond.basic.b2_board.common.handler;
 
 import com.beyond.basic.b2_board.common.dto.CommonErrorDto;
 import jakarta.persistence.EntityNotFoundException;

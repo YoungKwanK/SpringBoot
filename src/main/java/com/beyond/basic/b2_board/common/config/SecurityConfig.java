@@ -1,6 +1,8 @@
 package com.beyond.basic.b2_board.common.config;
 
 import com.beyond.basic.b2_board.common.JwtTokenFilter;
+import com.beyond.basic.b2_board.common.handler.JwtAuthenticationHandler;
+import com.beyond.basic.b2_board.common.handler.JwtAuthorizationHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,6 +27,8 @@ import java.util.Arrays;
 public class SecurityConfig {
 
     private final JwtTokenFilter jwtTokenFilter;
+    private final JwtAuthorizationHandler jwtAuthorizationHandler;
+    private final JwtAuthenticationHandler jwtAuthenticationHandler;
 
 //    내가 만든 객체는 Component, 외부 라이브러리를 활용한 객체는 Bean + Configuration
 //    Bean은 메서드 위에 붙여 return되는 객체를 싱글톤객체로 생성.
@@ -45,6 +49,10 @@ public class SecurityConfig {
                 .sessionManagement(s->s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 //                token을 검증하고, token검증을 통해 Authentication객체 생성
                 .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(e->
+                        e.authenticationEntryPoint(jwtAuthenticationHandler) // 401의 경우
+                         .accessDeniedHandler(jwtAuthorizationHandler) // 403의 경우
+                )
 //                예외 API 정책 설정
 //                authenticated() : 예외를 제외한 모든 요청에 대해서 Authentication객체가 생성되기를 요구
                 .authorizeHttpRequests(a->a.requestMatchers("/author/create", "/author/doLogin").permitAll().anyRequest().authenticated())

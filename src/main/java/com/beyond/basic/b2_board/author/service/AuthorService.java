@@ -7,6 +7,7 @@ import com.beyond.basic.b2_board.post.domain.Post;
 import com.beyond.basic.b2_board.post.repository.PostRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -74,6 +75,7 @@ public class AuthorService {
         Post post = Post.builder()
                 .title("안녕하세요")
                 .contents(authorCreateDto.getName() + "입니다. 반갑습니다.")
+                .delYn("N")
 //                author객체가 db에 save되는 순간 엔티티매니저와 영속성컨텍스트에 의해 author객체에도 id값 생성.
                 .author(author)
                 .build();
@@ -121,6 +123,12 @@ public class AuthorService {
         // orElseThrow로 예외처리
 //        return this.authorMemoryRepository.findById(id).orElseThrow();
 //        return optionalAuthor.orElseThrow(() -> new NoSuchElementException("존재하지 않는 id 입니다."));
+    }
+    @Transactional(readOnly = true)
+    public AuthorDetailDto myinfo() throws NoSuchElementException {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Author author = authorRepository.findByEmail(email).orElseThrow(() -> new NoSuchElementException("존재하지 않는 id 입니다."));
+        return AuthorDetailDto.fromEntity(author);
     }
 
     // 비밀번호 변경

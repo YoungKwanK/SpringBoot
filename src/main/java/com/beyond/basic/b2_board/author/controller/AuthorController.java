@@ -5,6 +5,7 @@ import com.beyond.basic.b2_board.author.dto.AuthorCreateDto;
 import com.beyond.basic.b2_board.author.dto.AuthorListDto;
 import com.beyond.basic.b2_board.author.dto.AuthorLoginDto;
 import com.beyond.basic.b2_board.author.dto.AuthorUpdatePwDto;
+import com.beyond.basic.b2_board.author.repository.AuthorRepository;
 import com.beyond.basic.b2_board.common.JwtTokenProvider;
 import com.beyond.basic.b2_board.common.dto.CommonDto;
 import com.beyond.basic.b2_board.author.service.AuthorService;
@@ -24,6 +25,8 @@ import java.util.NoSuchElementException;
 public class AuthorController {
     private final AuthorService authorService;
     private final JwtTokenProvider jwtTokenProvider;
+    private final AuthorRepository authorRepository;
+
     // 회원가입
     @PostMapping("/create")
 //    dto에 있는 validation어노테이션과 controller @Valid가 한 쌍
@@ -52,10 +55,16 @@ public class AuthorController {
     // 서버에서 별도의 try catch하지 않으면, 에러 발생 시 500에러 + 스프링의 포맷으로 에러를 리턴.
     @GetMapping("/detail/{id}")
 //    ADMIN권한이 있는 지를 AUTHENTICATION 객체에서 쉽게 확인(ROLE_를 떼어줌)
+//    권한이 없을 경우 filterchain에서 에러 발생
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> findById (@PathVariable Long id)throws NoSuchElementException {
 //            return new ResponseEntity<>(authorService.findById(id), HttpStatus.OK);
         return new ResponseEntity<>(new CommonDto(authorService.findById(id),HttpStatus.OK.value(), "성공 ~"), HttpStatus.OK);
+    }
+
+    @GetMapping("/myinfo")
+    public ResponseEntity<?> findMyInfo()throws NoSuchElementException {
+        return new ResponseEntity<>(new CommonDto(authorService.myinfo(),HttpStatus.OK.value(), "성공 ~"), HttpStatus.OK);
     }
     
     // 비밀번호수정 : email.password -> json. /author/updatepw
