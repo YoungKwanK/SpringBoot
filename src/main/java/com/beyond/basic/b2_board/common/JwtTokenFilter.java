@@ -28,7 +28,7 @@ public class JwtTokenFilter extends GenericFilter {
             HttpServletRequest req = (HttpServletRequest) request;
             String bearerToken = req.getHeader("Authorization");
             if (bearerToken == null) {
-//              토큰이 없는 경우 다시 filterChain으로 되돌아가는 로직
+//              토큰이 없는 경우 다시 filterChain으로 되돌아가는 로직, Authentication 안만들어줌
                 chain.doFilter(request, response);
                 return;
             }

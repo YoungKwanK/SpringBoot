@@ -36,6 +36,7 @@ public class Author {
     @Enumerated(EnumType.STRING)
     @Builder.Default //  빌더패턴에서 변수 초기화(디폴트값) 시 Builder.Default어노테이션 필수
     private Role role = Role.USER;
+    private String profileImage;
 //    컬럼명에 캐멀케이스 사용시, db에는 created_time으로 컬럼 생성
     @CreationTimestamp
     private LocalDateTime createdTime;
@@ -55,6 +56,10 @@ public class Author {
 
     public void updatePw(String password) {
         this.password = password;
+    }
+
+    public void updateImageUrl(String profileImage) {
+        this.profileImage = profileImage;
     }
 
 //    public AuthorDetailDto authorDetailDtoFromEntity() {

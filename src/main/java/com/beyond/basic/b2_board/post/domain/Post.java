@@ -41,6 +41,8 @@ public class Post extends BaseTimeEntity {
     private String appointment="N";
     private LocalDateTime appointmentTime;
 
+    private String category;
+
     public void updateAppointment(String appointment) {
         this.appointment = appointment;
     }
