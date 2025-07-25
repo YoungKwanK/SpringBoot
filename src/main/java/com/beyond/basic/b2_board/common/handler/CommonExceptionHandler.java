@@ -32,4 +32,8 @@ public class CommonExceptionHandler {
     public ResponseEntity<?> entityNotFoundException(EntityNotFoundException e){
         return new ResponseEntity<>(new CommonErrorDto(HttpStatus.NOT_FOUND.value(),e.getMessage()), HttpStatus.NOT_FOUND);
     }
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<?> error(Exception e){
+        return new ResponseEntity<>(new CommonErrorDto(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 }

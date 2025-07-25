@@ -14,6 +14,8 @@ public class Student {
     private String email;
     private List<Score> scores;
 
+    @AllArgsConstructor
+    @NoArgsConstructor
     @Data
     public static class Score{
         private String subject;

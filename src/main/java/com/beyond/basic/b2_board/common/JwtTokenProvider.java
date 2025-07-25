@@ -38,13 +38,14 @@ public class JwtTokenProvider {
 //        주된 키 값을 제외한 나머지 사용자 정보는 put사용하면 key:value 세팅
         claims.put("role", role);
         Date now = new Date();
+        // Jwts.builder에서 header를 생략하면 자동 생성
         String token = Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + expirationAt*60*1000L)) // 30분을 세팅(밀리초)
-//                secret키를 통해 signiture 생성
-                .signWith(secret_at_key)
-                .compact();
+//                secret키를 통해 signiture 생성 여기서 헤더 + 페이로드 + 시크릿 키를 암호화
+                .signWith(secret_at_key) 
+                .compact(); // .으로 연결하여 인코딩
         return token;
     }
 }
